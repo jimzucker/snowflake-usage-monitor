@@ -12,19 +12,20 @@ We will support 2 options in configutaration for output to slack
 
 ### Format 1: Just one line for an Account
 
-Account | Forecast |  Trend
+Account | Forecast |  Trend<BR>
 12345   | 9,999.9  |  +/-XX%
 
 ### Format 2: One row for each Warehouse
-<accountId>    | Forecast |  Trend
-WAREHOUSE1     | 9,999.9  |  +/-XX%
-WAREHOUSE2     | 9,999.9  |  +/-XX%
-WAREHOUSE3     | 9,999.9  |  +/-XX%
+accountId-1234    | Forecast |  Trend<BR>
+WAREHOUSE1     | 9,999.9  |  +/-XX%<BR>
+WAREHOUSE2     | 9,999.9  |  +/-XX%<BR>
+WAREHOUSE3     | 9,999.9  |  +/-XX%<BR>
 
 
 ## Acceptance Criteria
 1. Instructions provided in README to install
 2. Both formats work on Slack using Snowflake External Function Feature
+
 
 # Installation Instructions
 
@@ -43,16 +44,27 @@ SELECT * from METERING_HISTORY_TREND;
 ```
 
 ### Your ouput should look like this:
-![Image of Cost Explorer](https://github.com/jimzucker/snowflake-usage-monitor/blob/main/images/METRIC_HISTORY_SUMMARY_VIEW.png)
+![Image of Cost Explorer](https://github.com/jimzucker/snowflake-usage-monitor/blob/main/images/METRIC_HISTORY_TREND.png)
+
+
+```
+SELECT * from METERING_HISTORY_NAME_TREND;
+```
+
+### Your ouput should look like this:
+![Image of Cost Explorer](https://github.com/jimzucker/snowflake-usage-monitor/blob/main/images/METRIC_HISTORY_NAME_TREND.png)
+
+
+
+
 
 ## AWS Slack External Function Installation Instructions
 
 
 
-# References
 
-## USAGE view in SNOWFLAKE Datbase
-https://docs.snowflake.com/en/sql-reference/account-usage.html
+## References
 
-## how to create an external function
-https://docs.snowflake.com/en/sql-reference/external-functions-creating-aws-template.html
+### [1. USAGE view in Snowflake Database](https://docs.snowflake.com/en/sql-reference/account-usage.html)
+
+###	 [2. How to create a Snowflake external function using AWS Lambda](https://docs.snowflake.com/en/sql-reference/external-functions-creating-aws-template.html)
