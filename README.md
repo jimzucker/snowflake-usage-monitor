@@ -30,12 +30,20 @@ WAREHOUSE3     | 9,999.9  |  +/-XX%
 
 ## Snowflake View Installation Iinstructions
 1. Run the sql `METERING_HISTORY_TREND.sql` to create the USAGE_MONITOR database and CALC_METERING_HISTORY_TREND stored procedure.
-2. Execute the stored procedure to populate the view METERING_HISTORY_TREND
-`USE DATABASE USAGE_MONITOR;
-call CALC_METERING_HISTORY_TREND();`
-3. Query the view to see the current statistics:
-`SELECT * from METERING_HISTORY_TREND;`
 
+2. Execute the stored procedure to populate the view METERING_HISTORY_TREND
+```
+USE DATABASE USAGE_MONITOR; 
+call CALC_METERING_HISTORY_TREND();
+```
+
+3. Query the view to see the current statistics: 
+```
+SELECT * from METERING_HISTORY_TREND;
+```
+
+### Your ouput should look like this:
+![Image of Cost Explorer](https://github.com/jimzucker/snowflake-usage-monitor/blob/main/images/METRIC_HISTORY_SUMMARY_VIEW.png)
 
 ## AWS Slack External Function Installation Instructions
 
