@@ -117,7 +117,7 @@ var who_cares = snowflake.execute( { sqlText:
        } );
        
 var who_cares = snowflake.execute( { sqlText:
-      `CREATE OR REPLACE TEMPORARY TABLE METERING_HISTORY_NAME_TREND(ACCOUNT VARCHAR(25), "MTD" VARCHAR(25), "FORECAST" VARCHAR(25), "PRIOR_MONTH" VARCHAR(25), "CHANGE" VARCHAR(25) );`
+      `CREATE OR REPLACE TEMPORARY TABLE METERING_HISTORY_NAME_TREND(NAME VARCHAR(25), "MTD" VARCHAR(25), "FORECAST" VARCHAR(25), "PRIOR_MONTH" VARCHAR(25), "CHANGE" VARCHAR(25) );`
        } );
 
 var who_cares = snowflake.execute( { sqlText:

@@ -42,16 +42,11 @@ call CALC_METERING_HISTORY_TREND();
 ```
 SELECT * from METERING_HISTORY_TREND;
 ```
-
-### Your ouput should look like this:
 ![Image of Cost Explorer](https://github.com/jimzucker/snowflake-usage-monitor/blob/main/images/METRIC_HISTORY_TREND.png)
-
 
 ```
 SELECT * from METERING_HISTORY_NAME_TREND;
 ```
-
-### Your ouput should look like this:
 ![Image of Cost Explorer](https://github.com/jimzucker/snowflake-usage-monitor/blob/main/images/METRIC_HISTORY_NAME_TREND.png)
 
 
