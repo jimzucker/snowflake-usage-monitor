@@ -18,7 +18,9 @@ under the License.
 */
 
 CREATE DATABASE IF NOT EXISTS USAGE_MONITOR;
+
 USE DATABASE USAGE_MONITOR;
+
 CREATE OR REPLACE PROCEDURE CALC_METERING_HISTORY_TREND() 
 RETURNS VARCHAR
 LANGUAGE javascript
@@ -79,6 +81,33 @@ var who_cares = snowflake.execute( { sqlText:
         GROUP BY 1;`
        } );
 
+/* -- Add Storage tracking in GB -- */
+var who_cares = snowflake.execute( { sqlText:
+      `INSERT INTO METERING_HISTORY_TREND
+          SELECT 'DATABASE_BYTES(GB)' ACCOUNT, TO_CHAR(SUM(MTD/1073741824),'999,999,999.000') "MTD", 
+                TO_CHAR(SUM(FORECAST/1073741824),'999,999,999.000') "FORECAST", 
+                TO_CHAR(SUM(PRIOR_MONTH/1073741824),'999,999,999.000') "PRIOR_MONTH", 
+                TO_CHAR((SUM(FORECAST/1073741824) - SUM(PRIOR_MONTH/1073741824))/SUM(PRIOR_MONTH/1073741824)*100, '999,999.0"%"') "CHANGE"
+          FROM (
+            SELECT CURRENT_ACCOUNT() ACCOUNT,SUM(AVERAGE_DATABASE_BYTES) MTD, 0 PRIOR_MONTH
+              , SUM(AVERAGE_DATABASE_BYTES) + ( AVG(AVERAGE_DATABASE_BYTES) * ( last_day(to_date(getdate())) - to_date(MAX(USAGE_DATE)) ) )  FORECAST
+            FROM "SNOWFLAKE"."ACCOUNT_USAGE"."DATABASE_STORAGE_USAGE_HISTORY"
+            WHERE  DATE_PART('YEAR',USAGE_DATE) = DATE_PART('YEAR', getdate()) and DATE_PART('MONTH',USAGE_DATE) = DATE_PART('MONTH', getdate())
+            UNION ALL 
+            SELECT CURRENT_ACCOUNT() ACCOUNT, 0 MTD, SUM(AVERAGE_DATABASE_BYTES) PRIOR_MONTH, SUM(AVERAGE_DATABASE_BYTES) FORECAST
+            FROM "SNOWFLAKE"."ACCOUNT_USAGE"."DATABASE_STORAGE_USAGE_HISTORY"
+            WHERE  DATE_PART('YEAR',USAGE_DATE) = DATE_PART('YEAR', dateadd(day, -30, getdate())) and DATE_PART('MONTH',USAGE_DATE) = DATE_PART('MONTH', dateadd(day, -30, getdate()))
+            UNION ALL
+            SELECT CURRENT_ACCOUNT() ACCOUNT, 0 MTD, 1 PRIOR_MONTH, 1 FORECAST
+            FROM "SNOWFLAKE"."ACCOUNT_USAGE"."DATABASE_STORAGE_USAGE_HISTORY"
+            WHERE  NOT EXISTS ( 
+              SELECT * FROM "SNOWFLAKE"."ACCOUNT_USAGE"."DATABASE_STORAGE_USAGE_HISTORY" 
+              WHERE DATE_PART('YEAR',USAGE_DATE) = DATE_PART('YEAR', dateadd(day, -30, getdate())) and DATE_PART('MONTH',USAGE_DATE) = DATE_PART('MONTH', dateadd(day, -30, getdate()))
+              )
+          )
+          GROUP BY 1;`
+       } );
+       
   var who_cares = snowflake.execute( { sqlText:
        `DROP TABLE METERING_HISTORY_TEMPTB`
        } );
@@ -136,6 +165,33 @@ var who_cares = snowflake.execute( { sqlText:
         GROUP BY 1;`
        } );
 
+/* -- Add Storage tracking in GB -- */
+    var who_cares = snowflake.execute( { sqlText:
+      `INSERT INTO METERING_HISTORY_NAME_TREND
+          SELECT 'DATABASE_BYTES(GB)' ACCOUNT, TO_CHAR(SUM(MTD/1073741824),'999,999,999.000') "MTD", 
+                TO_CHAR(SUM(FORECAST/1073741824),'999,999,999.000') "FORECAST", 
+                TO_CHAR(SUM(PRIOR_MONTH/1073741824),'999,999,999.000') "PRIOR_MONTH", 
+                TO_CHAR((SUM(FORECAST/1073741824) - SUM(PRIOR_MONTH/1073741824))/SUM(PRIOR_MONTH/1073741824)*100, '999,999.0"%"') "CHANGE"
+          FROM (
+            SELECT CURRENT_ACCOUNT() ACCOUNT,SUM(AVERAGE_DATABASE_BYTES) MTD, 0 PRIOR_MONTH
+              , SUM(AVERAGE_DATABASE_BYTES) + ( AVG(AVERAGE_DATABASE_BYTES) * ( last_day(to_date(getdate())) - to_date(MAX(USAGE_DATE)) ) )  FORECAST
+            FROM "SNOWFLAKE"."ACCOUNT_USAGE"."DATABASE_STORAGE_USAGE_HISTORY"
+            WHERE  DATE_PART('YEAR',USAGE_DATE) = DATE_PART('YEAR', getdate()) and DATE_PART('MONTH',USAGE_DATE) = DATE_PART('MONTH', getdate())
+            UNION ALL 
+            SELECT CURRENT_ACCOUNT() ACCOUNT, 0 MTD, SUM(AVERAGE_DATABASE_BYTES) PRIOR_MONTH, SUM(AVERAGE_DATABASE_BYTES) FORECAST
+            FROM "SNOWFLAKE"."ACCOUNT_USAGE"."DATABASE_STORAGE_USAGE_HISTORY"
+            WHERE  DATE_PART('YEAR',USAGE_DATE) = DATE_PART('YEAR', dateadd(day, -30, getdate())) and DATE_PART('MONTH',USAGE_DATE) = DATE_PART('MONTH', dateadd(day, -30, getdate()))
+            UNION ALL
+            SELECT CURRENT_ACCOUNT() ACCOUNT, 0 MTD, 1 PRIOR_MONTH, 1 FORECAST
+            FROM "SNOWFLAKE"."ACCOUNT_USAGE"."DATABASE_STORAGE_USAGE_HISTORY"
+            WHERE  NOT EXISTS ( 
+              SELECT * FROM "SNOWFLAKE"."ACCOUNT_USAGE"."DATABASE_STORAGE_USAGE_HISTORY" 
+              WHERE DATE_PART('YEAR',USAGE_DATE) = DATE_PART('YEAR', dateadd(day, -30, getdate())) and DATE_PART('MONTH',USAGE_DATE) = DATE_PART('MONTH', dateadd(day, -30, getdate()))
+              )
+          )
+          GROUP BY 1;`
+       } );
+       
   var who_cares = snowflake.execute( { sqlText:
        `DROP TABLE METERING_HISTORY_NAME_TEMPTB`
        } );
