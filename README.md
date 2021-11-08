@@ -54,7 +54,19 @@ SELECT * from METERING_HISTORY_NAME_TREND;
 
 
 ## AWS Slack External Function Installation Instructions
+Steps for creating Snowflake external function using the CloudFormation template:
 
+1. Go to AWS cloudformation and create a stack using this template:
+```
+snowflake-usage-monitor-cf.yaml
+```
+2. Note the Gateway IAM role and URL of the "slack_post" method created in the API Gateway.
+3. Create API integration in Snowflake using the Gatway URL and Gateway Role ARN. Using this sql:
+```
+snowflake_usage_monitor.sql
+```
+4. Update the API Gateway role trust relation with API integration's API_AWS_IAM_USER_ARN and API_AWS_EXTERNAL_ID.
+5. Create and run the external function.
 
 
 
@@ -63,3 +75,5 @@ SELECT * from METERING_HISTORY_NAME_TREND;
 ### [1. USAGE view in Snowflake Database](https://docs.snowflake.com/en/sql-reference/account-usage.html)
 
 ###	 [2. How to create a Snowflake external function using AWS Lambda](https://docs.snowflake.com/en/sql-reference/external-functions-creating-aws-template.html)
+
+###	 [2. How to create a Snowflake API Intergration](https://docs.snowflake.com/en/sql-reference/sql/create-api-integration.html)

@@ -23,13 +23,13 @@ Parameters:
   apiGatewayStageName:
     Type: "String"
     AllowedPattern: "^[-a-z0-9]+$"
-    Default: "snowflake-cost-monitor-stage"
+    Default: "snowflake-usage-monitor-stage"
     Description: "API deployment stage"
 
   lambdaName:
     Type: "String"
     AllowedPattern: "^[a-zA-Z0-9]+[-a-zA-Z0-9-]+[-a-zA-Z0-9]+$"
-    Default: "snowflake-cost-monitor-lambda"
+    Default: "snowflake-usage-monitor-lambda"
     Description: "Lambda instance name"
 
   apiGatewayType:
@@ -43,16 +43,18 @@ Parameters:
   apiGatewayName:
     Type: "String"
     AllowedPattern: "^[a-zA-Z0-9]+[-a-zA-Z0-9-]+[-a-zA-Z0-9]+$"
-    Default: "snowflake-cost-monitor-api"
+    Default: "snowflake-usage-monitor-api"
     Description: "API Gateway instance name"
 
   apiGatewayIAMRoleName:
     Type: "String"
+    Default: "snowflake-usage-monitor-agw-role"
     AllowedPattern: "^[a-zA-Z0-9]+[-a-zA-Z0-9-]+[-a-zA-Z0-9]+$"
     Description: "Role used with Snowflake API Integration"
 
   lambdaExecutionRoleName:
     Type: "String"
+    Default: "snowflake-usage-monitor-lambda-role"
     AllowedPattern: "^[a-zA-Z0-9]+[-a-zA-Z0-9-]+[-a-zA-Z0-9]+$"
     Description: "Role used by the Lambda."
 
@@ -90,7 +92,7 @@ Resources:
       ParentId: !GetAtt 
         - apiGateway
         - RootResourceId
-      PathPart: echo
+      PathPart: slack_post
       
   apiGatewayRootMethod:
     Type: "AWS::ApiGateway::Method"
