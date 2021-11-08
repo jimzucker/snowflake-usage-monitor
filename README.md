@@ -90,9 +90,16 @@ DESCRIBE INTEGRATION usage_monitor_slack_integration;
 USE DATABASE USAGE_MONITOR;
 CREATE OR REPLACE EXTERNAL FUNCTION usage_monitor_slack(n integer, v varchar)
     RETURNS variant
+    IMMUTABLE
     api_integration = usage_monitor_slack_integration
     AS '<resource_invocation_url from cloudformation output>';
 ```
+
+
+## Create usage_monitor proc 
+
+
+## Schedule usage_monitor to run daily
 
 
 
