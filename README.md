@@ -113,6 +113,6 @@ CREATE OR REPLACE EXTERNAL FUNCTION usage_monitor_slack(n integer, v varchar)
 
 
 ## Development Journal
-7-Nov Setup External function infrastructure on AWS lambda and updated documentation (5h)
-7-Nov Researched adding Storage and updated views (3h)
-6-Nov Created Primay view or usage monitoring (5 hour)
+7-Nov Setup External function infrastructure on AWS lambda and updated documentation (5h)<br>
+7-Nov Researched adding Storage and updated views (3h)<br>
+6-Nov Created Primay view or usage monitoring (5 hour)<br>
