@@ -61,12 +61,38 @@ Steps for creating Snowflake external function using the CloudFormation template
 snowflake-usage-monitor-cf.yaml
 ```
 2. Note the Gateway IAM role and URL of the "slack_post" method created in the API Gateway.
-3. Create API integration in Snowflake using the Gatway URL and Gateway Role ARN. Using this sql:
+3. Create API integration in Snowflake using the Gatway URL and Gateway Role ARN
+
 ```
-snowflake_usage_monitor.sql
+/*
+    Update API_AWS_ROLE_ARN & API_ALLOWED_PREFIXES to output of running your cloud formation stack
+*/
+
+USE ROLE ACCOUNTADMIN;
+
+CREATE OR REPLACE API INTEGRATION  usage_monitor_slack_integration
+    API_PROVIDER = aws_api_gateway
+--    API_PROVIDER = aws_private_api_gateway 
+    API_AWS_ROLE_ARN = 'arn:aws:iam::<id>:role/snowflake-usage-monitor-agw-role'
+    API_ALLOWED_PREFIXES = ('https://<id>.execute-api.us-east-1.amazonaws.com/snowflake-usage-monitor-stage/slack_post')
+    ENABLED = TRUE
+    COMMENT = 'Post Usage Monitoring data to Slack'
+    ;
+
+-- Update the API Gateway role trust relation with API integration's API_AWS_IAM_USER_ARN and API_AWS_EXTERNAL_ID
+DESCRIBE INTEGRATION usage_monitor_slack_integration;
 ```
-4. Update the API Gateway role trust relation with API integration's API_AWS_IAM_USER_ARN and API_AWS_EXTERNAL_ID.
-5. Create and run the external function.
+
+4. Update the API Gateway role trust relation with API integration's API_AWS_IAM_USER_ARN and API_AWS_EXTERNAL_ID by following these instructions, [click here](https://docs.snowflake.com/en/sql-reference/external-functions-creating-aws-common-api-integration-proxy-link.html).
+
+5. Create the external function
+```
+USE DATABASE USAGE_MONITOR;
+CREATE OR REPLACE EXTERNAL FUNCTION usage_monitor_slack(n integer, v varchar)
+    RETURNS variant
+    api_integration = usage_monitor_slack_integration
+    AS '<resource_invocation_url from cloudformation output>';
+```
 
 
 
