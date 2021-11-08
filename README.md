@@ -90,7 +90,6 @@ DESCRIBE INTEGRATION usage_monitor_slack_integration;
 USE DATABASE USAGE_MONITOR;
 CREATE OR REPLACE EXTERNAL FUNCTION usage_monitor_slack(n integer, v varchar)
     RETURNS variant
-    IMMUTABLE
     api_integration = usage_monitor_slack_integration
     AS '<resource_invocation_url from cloudformation output>';
 ```
@@ -110,3 +109,10 @@ CREATE OR REPLACE EXTERNAL FUNCTION usage_monitor_slack(n integer, v varchar)
 ###	 [2. How to create a Snowflake external function using AWS Lambda](https://docs.snowflake.com/en/sql-reference/external-functions-creating-aws-template.html)
 
 ###	 [2. How to create a Snowflake API Intergration](https://docs.snowflake.com/en/sql-reference/sql/create-api-integration.html)
+
+
+
+## Development Journal
+7-Nov Setup External function infrastructure on AWS lambda and updated documentation (5h)
+7-Nov Researched adding Storage and updated views (3h)
+6-Nov Created Primay view or usage monitoring (5 hour)
