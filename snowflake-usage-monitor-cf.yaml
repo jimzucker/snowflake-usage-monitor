@@ -123,39 +123,36 @@ Resources:
       Code:
         ZipFile: |
           import json
+          import requests
 
           def handler(event, context):
               status_code = 200
-              array_of_rows_to_return = []
+              result = []
+              SLACK_URL = "https://hooks.slack.com/services/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"
 
               try:
-                  event_body = event["body"]
-
-                  payload = json.loads(event_body)
-                  rows = payload["data"]
+                  event_body = json.loads(event["body"])
+                  rows = event_body["data"]
 
                   for row in rows:
-                      row_number = row[0]
+                      database, mtd, forecast, prior_month, change = row[1:]
+                      result.append(f"{database} - MTD:{mtd} Forecast:{forecast} Prior Month:{prior_month} Change:{change.strip()}")
 
-                      input_value_1 = row[1]
+                  slack_message = {"text": '\n'.join(result)}
+                  response = requests.post(SLACK_URL, json=slack_message)
 
-                      input_value_2 = row[2]
-                      
-                      output_value = ["Echoing inputs:", input_value_1, input_value_2]
-
-                      row_to_return = [row_number, output_value]
-
-                      array_of_rows_to_return.append(row_to_return)
-
-                  json_compatible_string_to_return = json.dumps({"data" : array_of_rows_to_return})
+                  if response.status_code != 200:
+                      print("Failed to post to Slack. Response:", response.text)
+                  else:
+                      print("Slack message posted successfully")
 
               except Exception as err:
                   status_code = 400
-                  json_compatible_string_to_return = event_body
+                  result = event_body
 
               return {
-                  'statusCode': status_code,
-                  'body': json_compatible_string_to_return
+                  "statusCode": status_code,
+                  "body": json.dumps(result)
               }
       Description: "Echo Lambda created from CloudFormation template"
       FunctionName: !Ref "lambdaName"
