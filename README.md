@@ -105,7 +105,7 @@ AS $$
     from metering_history_name_trend;
 $$;
 ```
-or
+or depending on if you want to run on METERING_HISTORY_NAME_TREND or METERING_HISTORY_TREND
 ```
 CREATE OR REPLACE PROCEDURE run_usage_monitor_slack()
 RETURNS INT
@@ -115,6 +115,7 @@ AS $$
     from metering_history_trend;
 $$;
 ```
+
 ## Schedule usage_monitor to run daily by creating a task
 ```
 CREATE OR REPLACE TASK daily_monitor
@@ -123,18 +124,20 @@ AS
 CALL run_usage_monitor_slack();
 
 ```
-and then schedule it to run on a schedule. You can make your own CRON if you want,but here,  #1 runs it at midnight UTC, and #2 runs it at noon UTC.
+
+# and then schedule it to CRON. You can make your own CRON if you want,but here,  #1 runs it at midnight UTC, and #2 runs it at noon UTC.
 ```
 ALTER TASK daily_monitor SET SCHEDULE = 'USING CRON 0 0 * * * UTC';
-
+```
+or
+```
 ALTER TASK daily_monitor SET SCHEDULE = 'USING CRON 12 0 * * * UTC';
 ```
 
 # Finally, get your SLACK Channel incoming webhook URL and paste it into your lambda function. looking like this
-
-
+```
 SLACK_URL = "https://hooks.slack.com/services/<id>/<id2>/<id3>"
-
+```
 
 ## References
 
