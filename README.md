@@ -130,6 +130,11 @@ ALTER TASK daily_monitor SET SCHEDULE = 'USING CRON 0 0 * * * UTC';
 ALTER TASK daily_monitor SET SCHEDULE = 'USING CRON 12 0 * * * UTC';
 ```
 
+# Finally, get your SLACK Channel incoming webhook URL and paste it into your lambda function. looking like this
+
+
+SLACK_URL = "https://hooks.slack.com/services/<id>/<id2>/<id3>"
+
 
 ## References
 
