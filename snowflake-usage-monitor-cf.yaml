@@ -128,7 +128,7 @@ Resources:
           def handler(event, context):
               status_code = 200
               result = []
-              SLACK_URL = "https://hooks.slack.com/services/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"
+              SLACK_URL = "<SLACK URL HERE>"
 
               try:
                   event_body = json.loads(event["body"])
