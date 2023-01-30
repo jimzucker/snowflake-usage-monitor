@@ -96,10 +96,39 @@ CREATE OR REPLACE EXTERNAL FUNCTION usage_monitor_slack(n integer, v varchar)
 
 
 ## Create usage_monitor proc 
+```
+CREATE OR REPLACE PROCEDURE run_usage_monitor_slack()
+RETURNS INT
+LANGUAGE SQL
+AS $$
+    select usage_monitor_slack(name, mtd, forecast, prior_month, change) 
+    from metering_history_name_trend;
+$$;
+```
+or
+```
+CREATE OR REPLACE PROCEDURE run_usage_monitor_slack()
+RETURNS INT
+LANGUAGE SQL
+AS $$
+    select usage_monitor_slack(account, mtd, forecast, prior_month, change) 
+    from metering_history_trend;
+$$;
+```
+## Schedule usage_monitor to run daily by creating a task
+```
+CREATE OR REPLACE TASK daily_monitor
+COMMENT = 'Task to run usage monitor slack'
+AS
+CALL run_usage_monitor_slack();
 
+```
+and then schedule it to run on a schedule. You can make your own CRON if you want,but here,  #1 runs it at midnight UTC, and #2 runs it at noon UTC.
+```
+ALTER TASK daily_monitor SET SCHEDULE = 'USING CRON 0 0 * * * UTC';
 
-## Schedule usage_monitor to run daily
-
+ALTER TASK daily_monitor SET SCHEDULE = 'USING CRON 12 0 * * * UTC';
+```
 
 
 ## References
