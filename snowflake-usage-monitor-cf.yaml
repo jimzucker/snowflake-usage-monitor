@@ -62,6 +62,13 @@ Parameters:
     Type: "String"
     Default: ""
     Description: "Snowflake VPC that has access to private API Gateway. Used only when creating a private API Gateway"
+    
+  slackUrlParameter:
+    NoEcho: true
+    Type: String
+    Default: ""
+    Description: Enter slack url if you want slack sent.
+
 
 Conditions:
   shouldCreateRegionalGateway: 

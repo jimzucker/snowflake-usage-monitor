@@ -88,7 +88,7 @@ DESCRIBE INTEGRATION usage_monitor_slack_integration;
 5. Create the external function
 ```
 USE DATABASE USAGE_MONITOR;
-CREATE OR REPLACE EXTERNAL FUNCTION usage_monitor_slack(n integer, v varchar)
+CREATE OR REPLACE EXTERNAL FUNCTION usage_monitor_slack(v varchar, l integer, m integer, n integer, o varchar)
     RETURNS variant
     api_integration = usage_monitor_slack_integration
     AS '<resource_invocation_url from cloudformation output>';
