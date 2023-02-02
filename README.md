@@ -74,7 +74,7 @@ CREATE OR REPLACE API INTEGRATION  usage_monitor_slack_integration
     API_PROVIDER = aws_api_gateway
 --    API_PROVIDER = aws_private_api_gateway 
     API_AWS_ROLE_ARN = 'arn:aws:iam::<id>:role/snowflake-usage-monitor-agw-role'
-    API_ALLOWED_PREFIXES = ('https://<id>.execute-api.us-east-1.amazonaws.com/snowflake-usage-monitor-stage/slack_post')
+    API_ALLOWED_PREFIXES = ('https://<id>.execute-api.us-east-1.amazonaws.com/snowflake-usage-monitor-stage/')
     ENABLED = TRUE
     COMMENT = 'Post Usage Monitoring data to Slack'
     ;
