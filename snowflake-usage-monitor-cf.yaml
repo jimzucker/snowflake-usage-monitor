@@ -68,6 +68,11 @@ Parameters:
     Type: String
     Default: ""
     Description: Enter slack url if you want slack sent.
+    
+  snsArnParameter:
+    Type: String
+    Default: ""
+    Description: Enter sns ARN if you want slack sent.
 
 
 Conditions:
@@ -165,7 +170,7 @@ Resources:
       FunctionName: !Ref "lambdaName"
       Handler: "index.handler"
       Role: !GetAtt "lambdaExecutionIAMRole.Arn" 
-      Runtime: "python3.7"
+      Runtime: "python3.9"
       Timeout: 10
 
   lambdaApiGatewayInvoke:
@@ -205,6 +210,13 @@ Resources:
                 - "lambda.amazonaws.com"
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"  
+
+  awsGenieSecretManager:
+    Type: 'AWS::SecretsManager::Secret'
+    Properties:
+      Name: awsgenie_secret_manager
+      SecretString: !Join [ '', [ '{"slack_url":', !Ref slackUrlParameter, '"sns_arn":', !Ref snsArnParameter, '}' ]]
+
 
 Outputs:
   resourceInvocationUrl:

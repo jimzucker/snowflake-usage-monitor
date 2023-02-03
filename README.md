@@ -96,23 +96,30 @@ CREATE OR REPLACE EXTERNAL FUNCTION usage_monitor_slack(v varchar, l integer, m 
 
 
 ## Create usage_monitor proc 
+# Run one of these depending on if you want to run on METERING_HISTORY_NAME_TREND or METERING_HISTORY_TREND
 ```
 CREATE OR REPLACE PROCEDURE run_usage_monitor_slack()
 RETURNS INT
 LANGUAGE SQL
 AS $$
-    select usage_monitor_slack(name, mtd, forecast, prior_month, change) 
+BEGIN
+    CALL CALC_METERING_HISTORY_TREND();
+    select usage_monitor_slack(name, forecast, change) 
     from metering_history_name_trend;
+END;
 $$;
 ```
-or depending on if you want to run on METERING_HISTORY_NAME_TREND or METERING_HISTORY_TREND
+or 
 ```
 CREATE OR REPLACE PROCEDURE run_usage_monitor_slack()
 RETURNS INT
 LANGUAGE SQL
 AS $$
-    select usage_monitor_slack(account, mtd, forecast, prior_month, change) 
+BEGIN
+    CALL CALC_METERING_HISTORY_TREND();
+    select usage_monitor_slack(account, forecast, change) 
     from metering_history_trend;
+END;
 $$;
 ```
 
