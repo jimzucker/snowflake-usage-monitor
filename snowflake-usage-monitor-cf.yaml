@@ -62,18 +62,6 @@ Parameters:
     Type: "String"
     Default: ""
     Description: "Snowflake VPC that has access to private API Gateway. Used only when creating a private API Gateway"
-    
-  slackUrlParameter:
-    NoEcho: true
-    Type: String
-    Default: ""
-    Description: Enter slack url if you want slack sent.
-    
-  snsArnParameter:
-    Type: String
-    Default: ""
-    Description: Enter sns ARN if you want slack sent.
-
 
 Conditions:
   shouldCreateRegionalGateway: 
@@ -210,12 +198,6 @@ Resources:
                 - "lambda.amazonaws.com"
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"  
-
-  awsGenieSecretManager:
-    Type: 'AWS::SecretsManager::Secret'
-    Properties:
-      Name: awsgenie_secret_manager
-      SecretString: !Join [ '', [ '{"slack_url":', !Ref slackUrlParameter, '"sns_arn":', !Ref snsArnParameter, '}' ]]
 
 
 Outputs:
