@@ -85,6 +85,7 @@ DESCRIBE INTEGRATION usage_monitor_slack_integration;
 
 4. Update the API Gateway role trust relation with API integration's API_AWS_IAM_USER_ARN and API_AWS_EXTERNAL_ID by following these instructions, [click here](https://docs.snowflake.com/en/sql-reference/external-functions-creating-aws-common-api-integration-proxy-link.html).
 
+
 5. Create the external function
 ```
 USE DATABASE USAGE_MONITOR;
@@ -95,7 +96,8 @@ CREATE OR REPLACE EXTERNAL FUNCTION usage_monitor_slack(v varchar, l integer, m 
 ```
 
 
-## Create usage_monitor proc 
+6. Create usage_monitor proc 
+
 # Run one of these depending on if you want to run on METERING_HISTORY_NAME_TREND or METERING_HISTORY_TREND
 ```
 CREATE OR REPLACE PROCEDURE run_usage_monitor_slack()
@@ -123,7 +125,7 @@ END;
 $$;
 ```
 
-## Schedule usage_monitor to run daily by creating a task
+7. Schedule usage_monitor to run daily by creating a task
 ```
 CREATE OR REPLACE TASK daily_monitor
 COMMENT = 'Task to run usage monitor slack'
@@ -132,7 +134,8 @@ CALL run_usage_monitor_slack();
 
 ```
 
-# and then schedule it to CRON. You can make your own CRON if you want,but here,  #1 runs it at midnight UTC, and #2 runs it at noon UTC.
+8. and then schedule it to CRON. 
+# You can make your own CRON if you want,but here,  #1 runs it at midnight UTC, and #2 runs it at noon UTC.
 ```
 ALTER TASK daily_monitor SET SCHEDULE = 'USING CRON 0 0 * * * UTC';
 ```
@@ -141,10 +144,22 @@ or
 ALTER TASK daily_monitor SET SCHEDULE = 'USING CRON 12 0 * * * UTC';
 ```
 
-# Finally, get your SLACK Channel incoming webhook URL and paste it into your lambda function. looking like this
+9. Get your SLACK Channel incoming webhook URL and create a secret in AWS Secrets Manager
+
+# Store a new secret - Type 'Other'. Key Value Pair that looks like this. 
+## secret name = slackurl
+### Remember to note the ARN of the secret!
 ```
-SLACK_URL = "https://hooks.slack.com/services/<id>/<id2>/<id3>"
+url : <SLACK URL HERE>
 ```
+
+10. Finally, go to your lambda function -> Configuration -> Permissions -> Click on the role
+    Add Permissions -> Create Inline Policy
+    Choose Service - Secrets Manager
+    Action - GetSecretValue
+    Resource - Specific -> Add ARN -> Insert ARN of your Secret. -> Add
+    Create Policy
+
 
 ## References
 
