@@ -89,7 +89,7 @@ DESCRIBE INTEGRATION usage_monitor_slack_integration;
 5. Create the external function
 ```
 USE DATABASE USAGE_MONITOR;
-CREATE OR REPLACE EXTERNAL FUNCTION usage_monitor_slack(v varchar, l integer, m integer, n integer, o varchar)
+CREATE OR REPLACE EXTERNAL FUNCTION usage_monitor_slack(v varchar, l integer, o varchar)
     RETURNS variant
     api_integration = usage_monitor_slack_integration
     AS '<resource_invocation_url from cloudformation output>';
@@ -134,7 +134,7 @@ CALL run_usage_monitor_slack();
 
 ```
 
-8. and then schedule it to CRON. 
+8. and then schedule it. 
 # You can make your own CRON if you want,but here,  #1 runs it at midnight UTC, and #2 runs it at noon UTC.
 ```
 ALTER TASK daily_monitor SET SCHEDULE = 'USING CRON 0 0 * * * UTC';
@@ -144,23 +144,14 @@ or
 ALTER TASK daily_monitor SET SCHEDULE = 'USING CRON 12 0 * * * UTC';
 ```
 
-9. Get your SLACK Channel incoming webhook URL and create a secret in AWS Secrets Manager
-
-# Store a new secret - Type 'Other'. Key Value Pair that looks like this. 
-
-```
-slack_url : <SLACK URL HERE>
-teams_url : <TEAMS URL HERE>
-```
-## secret name = slackurl
-### Remember to note the ARN of the secret!
-
-10. Finally, go to your lambda function -> Configuration -> Permissions -> Click on the role
+9.  Go to Secrets Manager, and get the ARN of the secret that has the Slack and Teams URL's that you provided on creation.
+    Finally, go to your lambda function -> Configuration -> Permissions -> Click on the role
     Add Permissions -> Create Inline Policy
     Choose Service - Secrets Manager
     Action - GetSecretValue
     Resource - Specific -> Add ARN -> Insert ARN of your Secret. -> Add
     Create Policy
+
 
 
 ## References
