@@ -78,8 +78,6 @@ Parameters:
 Conditions:
   shouldCreateRegionalGateway: 
     !Equals [!Ref apiGatewayType, "REGIONAL"]
-  useSlackCondition: !Not [ !Equals [ !Ref slackUrlParameter , "" ] ]
-  useTeamsCondition: !Not [ !Equals [ !Ref teamsUrlParameter , "" ] ]
 
 Resources:
   apiGateway:
