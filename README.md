@@ -147,11 +147,13 @@ ALTER TASK daily_monitor SET SCHEDULE = 'USING CRON 12 0 * * * UTC';
 9. Get your SLACK Channel incoming webhook URL and create a secret in AWS Secrets Manager
 
 # Store a new secret - Type 'Other'. Key Value Pair that looks like this. 
+
+```
+slack_url : <SLACK URL HERE>
+teams_url : <TEAMS URL HERE>
+```
 ## secret name = slackurl
 ### Remember to note the ARN of the secret!
-```
-url : <SLACK URL HERE>
-```
 
 10. Finally, go to your lambda function -> Configuration -> Permissions -> Click on the role
     Add Permissions -> Create Inline Policy
