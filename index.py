@@ -1,4 +1,4 @@
-seimport requests
+import requests
 import boto3
 import json
 
@@ -16,12 +16,12 @@ def send_slack_message(slack_url: str, message: str):
       print("Slack message posted successfully")
       
 def send_teams_message(teams_url: str, message: str):
-  message = '\n'.join(message)
   response = requests.post(teams_url, json={"text": message})
   if response.status_code != 200:
       print("Failed to post to Teams. Response:", response.text)
   else:
       print("Teams message posted successfully")
+      
 
 def handler(event, context):
   result = []
