@@ -74,7 +74,7 @@ CREATE OR REPLACE API INTEGRATION  usage_monitor_slack_integration
     API_PROVIDER = aws_api_gateway
 --    API_PROVIDER = aws_private_api_gateway 
     API_AWS_ROLE_ARN = 'arn:aws:iam::<id>:role/snowflake-usage-monitor-agw-role'
-    API_ALLOWED_PREFIXES = ('https://<id>.execute-api.us-east-1.amazonaws.com/snowflake-usage-monitor-stage/slack_post')
+    API_ALLOWED_PREFIXES = ('https://<id>.execute-api.us-east-1.amazonaws.com/snowflake-usage-monitor-stage/')
     ENABLED = TRUE
     COMMENT = 'Post Usage Monitoring data to Slack'
     ;
@@ -85,20 +85,65 @@ DESCRIBE INTEGRATION usage_monitor_slack_integration;
 
 4. Update the API Gateway role trust relation with API integration's API_AWS_IAM_USER_ARN and API_AWS_EXTERNAL_ID by following these instructions, [click here](https://docs.snowflake.com/en/sql-reference/external-functions-creating-aws-common-api-integration-proxy-link.html).
 
+
 5. Create the external function
 ```
 USE DATABASE USAGE_MONITOR;
-CREATE OR REPLACE EXTERNAL FUNCTION usage_monitor_slack(n integer, v varchar)
+CREATE OR REPLACE EXTERNAL FUNCTION usage_monitor_slack(v varchar, l integer, o varchar)
     RETURNS variant
     api_integration = usage_monitor_slack_integration
     AS '<resource_invocation_url from cloudformation output>';
 ```
 
 
-## Create usage_monitor proc 
+6. Create usage_monitor proc 
 
+# Run one of these depending on if you want to run on METERING_HISTORY_NAME_TREND or METERING_HISTORY_TREND
+```
+CREATE OR REPLACE PROCEDURE run_usage_monitor_slack()
+RETURNS INT
+LANGUAGE SQL
+AS $$
+BEGIN
+    CALL CALC_METERING_HISTORY_TREND();
+    select usage_monitor_slack(name, forecast, change) 
+    from metering_history_name_trend;
+END;
+$$;
+```
+or 
+```
+CREATE OR REPLACE PROCEDURE run_usage_monitor_slack()
+RETURNS INT
+LANGUAGE SQL
+AS $$
+BEGIN
+    CALL CALC_METERING_HISTORY_TREND();
+    select usage_monitor_slack(account, forecast, change) 
+    from metering_history_trend;
+END;
+$$;
+```
 
-## Schedule usage_monitor to run daily
+7. Schedule usage_monitor to run daily by creating a task
+```
+CREATE OR REPLACE TASK daily_monitor
+COMMENT = 'Task to run usage monitor slack'
+AS
+CALL run_usage_monitor_slack();
+
+```
+
+8. and then schedule it. 
+# You can make your own CRON if you want,but here,  #1 runs it at midnight UTC, and #2 runs it at noon UTC.
+```
+ALTER TASK daily_monitor SET SCHEDULE = 'USING CRON 0 0 * * * UTC';
+```
+or
+```
+ALTER TASK daily_monitor SET SCHEDULE = 'USING CRON 12 0 * * * UTC';
+```
+
 
 
 
