@@ -144,13 +144,6 @@ or
 ALTER TASK daily_monitor SET SCHEDULE = 'USING CRON 12 0 * * * UTC';
 ```
 
-9.  Go to Secrets Manager, and get the ARN of the secret that has the Slack and Teams URL's that you provided on creation.
-    Finally, go to your lambda function -> Configuration -> Permissions -> Click on the role
-    Add Permissions -> Create Inline Policy
-    Choose Service - Secrets Manager
-    Action - GetSecretValue
-    Resource - Specific -> Add ARN -> Insert ARN of your Secret. -> Add
-    Create Policy
 
 
 
