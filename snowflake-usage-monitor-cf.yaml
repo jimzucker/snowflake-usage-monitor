@@ -230,9 +230,8 @@ Resources:
   awsGenieSecretManager:
     Type: 'AWS::SecretsManager::Secret'
     Properties:
-      Name: slackurl
-      SecretString: !Join [ '', [ '{"slack_url":', !Ref slackUrlParameter, '"teams_url":', !Ref teamsUrlParameter, '}' ]]
-
+      Name: awsgenie_secret_manager
+      SecretString: !Join [ '', [ '{"slack_url": "', !Ref slackUrlParameter, '", "teams_url": "', !Ref teamsUrlParameter, '"}' ]]
 
 Outputs:
   resourceInvocationUrl:
