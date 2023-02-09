@@ -231,14 +231,14 @@ Resources:
             Principal:
               Service:
                 - "lambda.amazonaws.com"
-    Policies:
-    - PolicyName: SecretsManagerReadPolicy
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Action:
-              - "secretsmanager:GetSecretValue"
-            Effect: "Allow"
+      Policies:
+      - PolicyName: SecretsManagerReadPolicy
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+            - secretsmanager:GetSecretValue
             Resource: !Ref snowflakeSecretManager
 
       ManagedPolicyArns:
