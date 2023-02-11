@@ -193,7 +193,7 @@ Resources:
       FunctionName: !Ref "lambdaName"
       Handler: "index.handler"
       Role: !GetAtt "lambdaExecutionIAMRole.Arn" 
-      Runtime: "python3.9"
+      Runtime: "python3.7"
       Timeout: 10
 
   lambdaApiGatewayInvoke:
