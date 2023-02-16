@@ -27,43 +27,13 @@ def get_secret(secret_name: str, region_name: str) -> str:
 	return secret
 
 def send_slack_message(slack_url: str, message: str):
-	current_date = datetime.datetime.now().strftime("%Y-%m-%d")
-	headers = [
-        {
-            "type": "header",
-            "text": {
-                "type": "plain_text",
-                "text": "Snowflake Usage Monitor"
-            }
-        },
-        {
-            "type": "section",
-            "text": {
-                "type": "plain_text",
-                "text": f"Current Date: {current_date}"
-            }
-        },
-        {
-            "type": "divider"
-        },
-        {
-            "type": "section",
-            "fields": [
-                {
-                    "type": "mrkdwn",
-                    "text": "*Database*"
-                }
-            ]
-        },
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": message
-            }
-        }
-    ]
-	response = requests.post(slack_url, json={"blocks": headers})
+	if slack_url == "":
+		return
+	slack_message = {
+		'text': message
+	}
+ 
+	response = requests.post(slack_url, json.dumps(slack_message).encode('utf-8'))
 	if response.status_code != 200:
 		print("Failed to post to Slack. Response:", response.text)
 	else:
@@ -74,7 +44,13 @@ def send_slack_message(slack_url: str, message: str):
 		print("Slack message posted successfully")
 	  
 def send_teams_message(teams_url: str, message: str):
-	response = requests.post(teams_url, json={"text": message})
+	if teams_url == "":
+		return
+
+	teams_message = {
+		'text': message
+	}
+	response = requests.post(teams_url, json.dumps(teams_message).encode('utf-8'))
 	if response.status_code != 200:
 		print("Failed to post to Teams. Response:", response.text)
 	else:
@@ -87,10 +63,13 @@ def handler(event, context):
 		event_body = json.loads(event["body"])
 		rows = event_body["data"]
 		result.append("```\n")
+  
 		for row in rows:
 			database, forecast, change = row[1:]
 			database = database.ljust(16)
-			result.append(f"{database} - {forecast}({change.strip()})\n")
+			forecast = forecast.ljust(10)
+			change = change.strip(8)
+			result.append(f"{database} | {forecast} | ({change})\n")
 		result.append("```")
 
 		secret = get_secret(SECRET_MANAGER, REGION)
