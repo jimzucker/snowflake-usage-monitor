@@ -179,6 +179,7 @@ var who_cares = snowflake.execute( { sqlText:
         )
         GROUP BY 1
         HAVING SUM(PRIOR_MONTH) = 0
+		    ORDER BY FORECAST DESC
         ;`
        } );
 
