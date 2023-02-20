@@ -70,7 +70,7 @@ var who_cares = snowflake.execute( { sqlText:
        SELECT ACCOUNT, TO_CHAR(SUM(CREDITS_USED),'999,999.00') "MTD", 
                 TO_CHAR(SUM(FORECAST),'999,999.00') "FORECAST", 
                 TO_CHAR(SUM(PRIOR_MONTH),'999,999.00') "PRIOR_MONTH", 
-                TO_CHAR((SUM(FORECAST) - SUM(PRIOR_MONTH))/SUM(PRIOR_MONTH)*100, '99,999.0"%"') "CHANGE"
+                TO_CHAR((SUM(FORECAST) - SUM(PRIOR_MONTH))/SUM(PRIOR_MONTH)*100, '999,999.0"%"') "CHANGE"
         FROM (
           SELECT CURRENT_ACCOUNT() as ACCOUNT, CREDITS_USED, 0 PRIOR_MONTH, 0 "CHANGE", FORECAST FROM METERING_HISTORY_TEMPTB
           WHERE START_TIME_MONTH = (SELECT MAX(START_TIME_MONTH) FROM METERING_HISTORY_TEMPTB)
@@ -166,7 +166,7 @@ SELECT 'Snowflake Usage'                        NAME,
                 FROM   snowflake.organization_usage.usage_in_currency_daily 
                 WHERE  usage_date > Dateadd(month, -2, CURRENT_TIMESTAMP()) AND 
                        usage_date < Dateadd(month, -1, CURRENT_TIMESTAMP()))*100, 
-               '99,999.0"%"') "CHANGE"
+               '999,999.0"%"') "CHANGE"
 FROM   (SELECT Round(Sum(usage_in_currency), 2) AS usage_in_currency
         FROM   snowflake.organization_usage.usage_in_currency_daily
         WHERE  usage_date > Dateadd(month, -1, CURRENT_TIMESTAMP()))
@@ -176,7 +176,7 @@ SELECT NAME,
        To_char(Sum(forecast)*2, '999,999.00')     "FORECAST",
        To_char(Sum(prior_month)*2, '999,999.00')  "PRIOR_MONTH",
        To_char(( Sum(forecast)*2 - Sum(prior_month)*2 ) / Sum(prior_month)*2 * 100,
-       '99,999.0"%"')                             "CHANGE"
+       '999,999.0"%"')                             "CHANGE"
 FROM   (SELECT NAME,
                credits_used,
                0 PRIOR_MONTH,
@@ -201,7 +201,7 @@ SELECT NAME,
        To_char(Sum(credits_used)*2, '999,999.00') "MTD",
        To_char(Sum(forecast)*2, '999,999.00')     "FORECAST",
        To_char(Sum(prior_month)*2, '999,999.00')  "PRIOR_MONTH",
-       To_char(Sum(forecast)*2, '99,999.0"%"')    "CHANGE"
+       To_char(Sum(forecast)*2, '999,999.0"%"')    "CHANGE"
 FROM   (SELECT NAME,
                credits_used,
                0 PRIOR_MONTH,
@@ -257,4 +257,3 @@ ORDER  BY forecast DESC;`
        
   return 'Done.';
 $$;
-

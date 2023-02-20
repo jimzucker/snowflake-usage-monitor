@@ -45,16 +45,21 @@ def handler(event, context):
         rows = event_body["data"]
         
         account_width = 19
-        forecast_width = 10
+        forecast_width = 12
         
-        #Add Header row and Divider
-        header = "Account".ljust(account_width) + " | " + "Forecast".ljust(forecast_width) + " | " + "Change".strip()
-        result.append(header)
-        divider = "-" * len(header)
-        result.append(divider)
-        
-        for row in rows:
+        for idx, row in enumerate(rows):
+            if idx == 0:
+                database, forecast, change = row[1:]
+                header = f"{'Account'.ljust(account_width)} | {'Forecast'.ljust(forecast_width)} | {'Change'.strip()}"
+                result.append(header)
+                divider = "-" * len(header)
+                result.append(divider)
+
             database, forecast, change = row[1:]
+            if not database.endswith("(GB)"):
+                forecast = f"${forecast}"
+            else:
+                forecast = str(forecast)
             str_forecast = str(forecast).ljust(forecast_width)
             result.append(f"{database.ljust(account_width)} | {str_forecast} | {change.strip()}")
         
