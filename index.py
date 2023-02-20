@@ -44,7 +44,7 @@ def handler(event, context):
         event_body = json.loads(event["body"])
         rows = event_body["data"]
         
-        account_width = 18
+        account_width = 19
         forecast_width = 10
         
         #Add Header row and Divider

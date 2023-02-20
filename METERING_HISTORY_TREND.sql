@@ -142,7 +142,7 @@ var who_cares = snowflake.execute( { sqlText:
                 GROUP BY 1,2
                 HAVING MONTH(START_TIME) + YEAR(START_TIME)*100 = MAX(MONTH(START_TIME) + YEAR(START_TIME)*100)
                 )
-            ORDER BY 1;`
+            ORDER BY FORECAST DESC;`
        } );
        
 var who_cares = snowflake.execute( { sqlText:
@@ -150,37 +150,78 @@ var who_cares = snowflake.execute( { sqlText:
        } );
 
 var who_cares = snowflake.execute( { sqlText:
-      `INSERT INTO METERING_HISTORY_NAME_TREND
-       SELECT NAME, TO_CHAR(SUM(CREDITS_USED),'999,999.00') "MTD", 
-                TO_CHAR(SUM(FORECAST),'999,999.00') "FORECAST", 
-                TO_CHAR(SUM(PRIOR_MONTH),'999,999.00') "PRIOR_MONTH", 
-                TO_CHAR((SUM(FORECAST) - SUM(PRIOR_MONTH))/SUM(PRIOR_MONTH)*100, '99,999.0"%"') "CHANGE"
-        FROM (
-          SELECT NAME, CREDITS_USED, 0 PRIOR_MONTH, 0 "CHANGE", FORECAST FROM METERING_HISTORY_NAME_TEMPTB
-          WHERE START_TIME_MONTH = (SELECT MAX(START_TIME_MONTH) FROM METERING_HISTORY_NAME_TEMPTB)
-          UNION ALL
-          SELECT NAME, 0, CREDITS_USED, 0, 0 FROM METERING_HISTORY_NAME_TEMPTB
-          WHERE START_TIME_MONTH = (SELECT MIN(START_TIME_MONTH) FROM METERING_HISTORY_NAME_TEMPTB)
-        )
-        GROUP BY 1
-        HAVING SUM(PRIOR_MONTH) != 0
-        
-        UNION ALL 
-        SELECT NAME, TO_CHAR(SUM(CREDITS_USED),'999,999.00') "MTD", 
-                TO_CHAR(SUM(FORECAST),'999,999.00') "FORECAST", 
-                TO_CHAR(SUM(PRIOR_MONTH),'999,999.00') "PRIOR_MONTH", 
-                TO_CHAR(SUM(FORECAST), '99,999.0"%"') "CHANGE"
-        FROM (
-          SELECT NAME, CREDITS_USED, 0 PRIOR_MONTH, 0 "CHANGE", FORECAST FROM METERING_HISTORY_NAME_TEMPTB
-          WHERE START_TIME_MONTH = (SELECT MAX(START_TIME_MONTH) FROM METERING_HISTORY_NAME_TEMPTB)
-          UNION ALL
-          SELECT NAME, 0, CREDITS_USED, 0, 0 FROM METERING_HISTORY_NAME_TEMPTB
-          WHERE START_TIME_MONTH = (SELECT MIN(START_TIME_MONTH) FROM METERING_HISTORY_NAME_TEMPTB)
-        )
-        GROUP BY 1
-        HAVING SUM(PRIOR_MONTH) = 0
-		    ORDER BY FORECAST DESC
-        ;`
+      `INSERT INTO metering_history_name_trend
+SELECT 'Snowflake Usage'                        NAME,
+       To_char(usage_in_currency, '999,999.00') "MTD",
+       To_char(usage_in_currency, '999,999.00') "FORECAST",
+       (SELECT To_char(Round(Sum(usage_in_currency), 2), '999,999.00') 
+        FROM   snowflake.organization_usage.usage_in_currency_daily
+        WHERE  usage_date > Dateadd(month, -2, CURRENT_TIMESTAMP()) AND 
+               usage_date < Dateadd(month, -1, CURRENT_TIMESTAMP())) "PRIOR_MONTH",
+       To_char((usage_in_currency - (SELECT Sum(usage_in_currency) 
+                                     FROM   snowflake.organization_usage.usage_in_currency_daily 
+                                     WHERE  usage_date > Dateadd(month, -2, CURRENT_TIMESTAMP()) AND 
+                                            usage_date < Dateadd(month, -1, CURRENT_TIMESTAMP())))/ 
+               (SELECT Sum(usage_in_currency) 
+                FROM   snowflake.organization_usage.usage_in_currency_daily 
+                WHERE  usage_date > Dateadd(month, -2, CURRENT_TIMESTAMP()) AND 
+                       usage_date < Dateadd(month, -1, CURRENT_TIMESTAMP()))*100, 
+               '99,999.0"%"') "CHANGE"
+FROM   (SELECT Round(Sum(usage_in_currency), 2) AS usage_in_currency
+        FROM   snowflake.organization_usage.usage_in_currency_daily
+        WHERE  usage_date > Dateadd(month, -1, CURRENT_TIMESTAMP()))
+UNION ALL
+SELECT NAME,
+       To_char(Sum(credits_used)*2, '999,999.00') "MTD",
+       To_char(Sum(forecast)*2, '999,999.00')     "FORECAST",
+       To_char(Sum(prior_month)*2, '999,999.00')  "PRIOR_MONTH",
+       To_char(( Sum(forecast)*2 - Sum(prior_month)*2 ) / Sum(prior_month)*2 * 100,
+       '99,999.0"%"')                             "CHANGE"
+FROM   (SELECT NAME,
+               credits_used,
+               0 PRIOR_MONTH,
+               0 "CHANGE",
+               forecast
+        FROM   metering_history_name_temptb
+        WHERE  start_time_month = (SELECT Max(start_time_month)
+                                   FROM   metering_history_name_temptb)
+        UNION ALL
+        SELECT NAME,
+               0,
+               credits_used,
+               0,
+               0
+        FROM   metering_history_name_temptb
+        WHERE  start_time_month = (SELECT Min(start_time_month)
+                                   FROM   metering_history_name_temptb))
+GROUP  BY 1
+HAVING Sum(prior_month) != 0
+UNION ALL
+SELECT NAME,
+       To_char(Sum(credits_used)*2, '999,999.00') "MTD",
+       To_char(Sum(forecast)*2, '999,999.00')     "FORECAST",
+       To_char(Sum(prior_month)*2, '999,999.00')  "PRIOR_MONTH",
+       To_char(Sum(forecast)*2, '99,999.0"%"')    "CHANGE"
+FROM   (SELECT NAME,
+               credits_used,
+               0 PRIOR_MONTH,
+               0 "CHANGE",
+               forecast
+        FROM   metering_history_name_temptb
+        WHERE  start_time_month = (SELECT Max(start_time_month)
+                                   FROM   metering_history_name_temptb)
+        UNION ALL
+        SELECT NAME,
+               0,
+               credits_used,
+               0,
+               0
+        FROM   metering_history_name_temptb
+        WHERE  start_time_month = (SELECT Min(start_time_month)
+                                   FROM   metering_history_name_temptb))
+GROUP  BY 1
+HAVING Sum(prior_month) = 0
+ORDER  BY forecast DESC;`
        } );
 
 /* -- Add Storage tracking in GB -- */
