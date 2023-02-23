@@ -151,25 +151,38 @@ var who_cares = snowflake.execute( { sqlText:
 
 var who_cares = snowflake.execute( { sqlText:
       `INSERT INTO metering_history_name_trend
-SELECT 'Snowflake Usage'                        NAME,
-       To_char(usage_in_currency, '999,999.00') "MTD",
-       To_char(usage_in_currency, '999,999.00') "FORECAST",
-       (SELECT To_char(Round(Sum(usage_in_currency), 2), '999,999.00') 
-        FROM   snowflake.organization_usage.usage_in_currency_daily
-        WHERE  usage_date > Dateadd(month, -2, CURRENT_TIMESTAMP()) AND 
-               usage_date < Dateadd(month, -1, CURRENT_TIMESTAMP())) "PRIOR_MONTH",
-       To_char((usage_in_currency - (SELECT Sum(usage_in_currency) 
-                                     FROM   snowflake.organization_usage.usage_in_currency_daily 
-                                     WHERE  usage_date > Dateadd(month, -2, CURRENT_TIMESTAMP()) AND 
-                                            usage_date < Dateadd(month, -1, CURRENT_TIMESTAMP())))/ 
-               (SELECT Sum(usage_in_currency) 
-                FROM   snowflake.organization_usage.usage_in_currency_daily 
-                WHERE  usage_date > Dateadd(month, -2, CURRENT_TIMESTAMP()) AND 
-                       usage_date < Dateadd(month, -1, CURRENT_TIMESTAMP()))*100, 
-               '999,999.0"%"') "CHANGE"
-FROM   (SELECT Round(Sum(usage_in_currency), 2) AS usage_in_currency
-        FROM   snowflake.organization_usage.usage_in_currency_daily
-        WHERE  usage_date > Dateadd(month, -1, CURRENT_TIMESTAMP()))
+SELECT 'Snowflake Usage' NAME
+	,To_char(mtd.usage_in_currency, '999,999.00') "MTD"
+	,To_char((
+			(
+				SELECT Sum(usage_in_currency)
+				FROM snowflake.organization_usage.usage_in_currency_daily
+				WHERE usage_date > Dateadd(day, - 30, CURRENT_TIMESTAMP())
+				) / 30
+			) * (Extract(day FROM Last_day(CURRENT_TIMESTAMP())) - Extract(day FROM CURRENT_TIMESTAMP())) + mtd.usage_in_currency, '999,999.00') "FORECAST"
+	,To_char((
+			SELECT Sum(usage_in_currency)
+			FROM snowflake.organization_usage.usage_in_currency_daily
+			WHERE usage_date > Dateadd(month, - 2, CURRENT_TIMESTAMP())
+				AND usage_date < Dateadd(month, - 1, CURRENT_TIMESTAMP())
+			), '999,999.00') "PRIOR_MONTH"
+	,To_char((mtd.usage_in_currency - (
+				SELECT Sum(usage_in_currency)
+				FROM snowflake.organization_usage.usage_in_currency_daily
+				WHERE usage_date > Dateadd(month, - 2, CURRENT_TIMESTAMP())
+					AND usage_date < Dateadd(month, - 1, CURRENT_TIMESTAMP())
+				)) / (
+				SELECT Sum(usage_in_currency)
+				FROM snowflake.organization_usage.usage_in_currency_daily
+				WHERE usage_date > Dateadd(month, - 2, CURRENT_TIMESTAMP())
+					AND usage_date < Dateadd(month, - 1, CURRENT_TIMESTAMP())
+				) * 100, '999,999.0"%"') "CHANGE"
+FROM (
+	SELECT Round(Sum(usage_in_currency), 2) AS usage_in_currency
+	FROM snowflake.organization_usage.usage_in_currency_daily
+	WHERE usage_date >= Trunc(CURRENT_TIMESTAMP(), 'MONTH')
+		AND usage_date <= CURRENT_TIMESTAMP()
+	) mtd
 UNION ALL
 SELECT NAME,
        To_char(Sum(credits_used)*2, '999,999.00') "MTD",
