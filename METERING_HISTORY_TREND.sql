@@ -22,7 +22,7 @@ under the License.
     They do this by multiplying the USAGE_IN_CREDITS by the COST PER CREDIT MULTIPLER. 
     This MULTIPLIER depends on the type of account that you have.
     For a BASIC account, it costs $2 per credit.
-    For an ENTERPRISE Account, it cosst $3.7 per credit.
+    For an ENTERPRISE Account, it costs $3.7 per credit.
     If you have an Enterprise Account, please change the value of "multipler" in the first line of code from 2 to 3.7
 */
 
