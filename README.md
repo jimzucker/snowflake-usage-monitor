@@ -11,7 +11,7 @@ If you have an Enterprise Account, please refer to METERING_HISTORY_TREND.sql to
 The METERING_HISTORY for compute does not seem to have a forecast either, so we will create a simple one based on MTD average where 
 	FORECAST = MTD + RemainingDays in month * AVG(MTD Daily Usage)
 
-We will support 2 options in configutaration for output to slack
+We will support 2 options in configuration for output to Slack/Teams
 
 ### Format 1: Just one line for an Account
 
