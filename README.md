@@ -106,8 +106,9 @@ LANGUAGE SQL
 AS $$
 BEGIN
     CALL CALC_METERING_HISTORY_TREND();
-    select usage_monitor_slack(name, forecast, change) 
-    from metering_history_name_trend;
+    SELECT usage_monitor_slack(name, forecast, change) 
+    FROM metering_history_name_trend
+    ORDER BY forecast DESC;
 END;
 $$;
 ```
@@ -119,8 +120,9 @@ LANGUAGE SQL
 AS $$
 BEGIN
     CALL CALC_METERING_HISTORY_TREND();
-    select usage_monitor_slack(account, forecast, change) 
-    from metering_history_trend;
+    SELECT usage_monitor_slack(account, forecast, change) 
+    FROM metering_history_trend
+    ORDER BY forecast DESC;
 END;
 $$;
 ```

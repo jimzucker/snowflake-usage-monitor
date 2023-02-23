@@ -25,17 +25,17 @@ def send_slack_message(slack_url: str, message: str):
     message = "```" + message + "```"
     response = requests.post(slack_url, json={"text": message})
     if response.status_code != 200:
-        print("Failed to post to Slack. Response:", response.text)
+        logger.error("Failed to post to Slack. Response: %s", response.text)
     else:
-        print("Slack message posted successfully")
-        
+        logger.info("Slack message posted successfully")
+
 def send_teams_message(teams_url: str, message: str):
     message = "```\n" + message + "\n```"
     response = requests.post(teams_url, json={"text": message})
     if response.status_code != 200:
-        print("Failed to post to Teams. Response:", response.text)
+        logger.error("Failed to post to Teams. Response: %s", response.text)
     else:
-        print("Teams message posted successfully")
+        logger.info("Teams message posted successfully")
 
 def handler(event, context):
     result = []
@@ -50,7 +50,7 @@ def handler(event, context):
         for idx, row in enumerate(rows):
             if idx == 0:
                 database, forecast, change = row[1:]
-                header = f"{'Account'.ljust(account_width)} | {'Forecast'.ljust(forecast_width)} | {'Change'.strip()}"
+                header = f"{'Account'.ljust(account_width)} | {'Forecast*'.ljust(forecast_width)} | {'Change'.strip()}"
                 result.append(header)
                 divider = "-" * len(header)
                 result.append(divider)
@@ -64,7 +64,8 @@ def handler(event, context):
             result.append(f"{database.ljust(account_width)} | {str_forecast} | {change.strip()}")
         
         secret = get_secret(SECRET_MANAGER, REGION)
-        
+        result.append("* Forecast components may be ±15%")
+
         slack_url = json.loads(secret)[SLACK_SECRET_KEY_NAME]
         send_slack_message(slack_url, '\n'.join(result))
         
