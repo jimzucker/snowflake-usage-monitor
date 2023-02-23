@@ -25,10 +25,10 @@ DATABASE_BYTES(GB)  | 9,999.9     | +/-XX%
 Account             | Forecast*          | Change
 -------------------------------------------
 Snowflake Usage     | $9,999.9           | +/-XX%
-WAREHOUSE1          | $9,999.9           | +/-XX%
-WAREHOUSE2          | $9,999.9           | +/-XX%
-CLOUD_SERVICES_ONLY | $9,999.9           | +/-XX%
-DATABASE_BYTES(GB)  | 9,999.9            | +/-XX%
+WAREHOUSE1          | $4,444.4           | +/-XX%
+WAREHOUSE2          | $3,333.3           | +/-XX%
+CLOUD_SERVICES_ONLY | $2,222.2           | +/-XX%
+DATABASE_BYTES(GB)  |  1,111.1           | +/-XX%
 
 
 ## Acceptance Criteria
