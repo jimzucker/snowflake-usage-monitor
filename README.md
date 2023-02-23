@@ -5,7 +5,8 @@ As a Developer I want a daily usage update that shows how my compute and storage
 The goal is for this to be similiar to the data we get from AWS Cost Explorer.  
 
 As the Snowflake View for per Warehouse usage does not track Usage in currency, we need to get the usage in credits, and then multiply it by the Cost Per Credit. 
-This can be either $2 per credit on a Basic account, or $3.7 per credit on an Enterprise Account.
+This can be either $2 per credit on a Basic account, or $3.7 per credit on an Enterprise Account. The SQL is currently configured to run on a Basic account.
+If you have an Enterprise Account, please refer to METERING_HISTORY_TREND.sql to see how to configure the app to accurately reflect your costs.
 
 The METERING_HISTORY for compute does not seem to have a forecast either, so we will create a simple one based on MTD average where 
 	FORECAST = MTD + RemainingDays in month * AVG(MTD Daily Usage)
