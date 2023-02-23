@@ -39,7 +39,8 @@ DATABASE_BYTES(GB)  |  1,111.1           | +/-XX%
 # Installation Instructions
 
 ## Snowflake View Installation Iinstructions
-1. Run the sql `METERING_HISTORY_TREND.sql` to create the USAGE_MONITOR database and CALC_METERING_HISTORY_TREND stored procedure.
+1. Run the sql `METERING_HISTORY_TREND.sql` to create the USAGE_MONITOR database and CALC_METERING_HISTORY_TREND stored procedure. 
+    Remember to change the Cost Per Credit in METERING_HISTORY_TREND.sql depending on if your account is Basic or Enterprise.
 
 2. Execute the stored procedure to populate the view METERING_HISTORY_TREND
 ```
