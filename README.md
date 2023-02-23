@@ -23,7 +23,7 @@ DATABASE_BYTES(GB)  | 9,999.9     | +/-XX%
 ### Format 2: One row for each Warehouse
 
 Account             | Forecast*          | Change
--------------------------------------------
+-------------------------------------------------
 Snowflake Usage     | $9,999.9           | +/-XX%
 WAREHOUSE1          | $4,444.4           | +/-XX%
 WAREHOUSE2          | $3,333.3           | +/-XX%
