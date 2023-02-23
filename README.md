@@ -4,22 +4,30 @@ As a Developer I want a daily usage update that shows how my compute and storage
 
 The goal is for this to be similiar to the data we get from AWS Cost Explorer.  
 
-As the Snowflake Views do not seem to have cost info we will show the data in capacity units that it is quoted in,
-The METERING_HISTORY for compute does not seem to have a forecast so we will create a simple one based on MTD average where 
+As the Snowflake View for per Warehouse usage does not track Usage in currency, we need to get the usage in credits, and then multiply it by the Cost Per Credit. 
+This can be either $2 per credit on a Basic account, or $3.7 per credit on an Enterprise Account.
+
+The METERING_HISTORY for compute does not seem to have a forecast either, so we will create a simple one based on MTD average where 
 	FORECAST = MTD + RemainingDays in month * AVG(MTD Daily Usage)
 
 We will support 2 options in configutaration for output to slack
 
 ### Format 1: Just one line for an Account
 
-Account | Forecast |  Trend<BR>
-12345   | 9,999.9  |  +/-XX%
+Account             | Forecast*    | Change
+-------------------------------------------
+12345               | $9,999.9     | +/-XX%
+DATABASE_BYTES(GB)  | 9,999.9     | +/-XX%
 
 ### Format 2: One row for each Warehouse
-accountId-1234    | Forecast |  Trend<BR>
-WAREHOUSE1     | 9,999.9  |  +/-XX%<BR>
-WAREHOUSE2     | 9,999.9  |  +/-XX%<BR>
-WAREHOUSE3     | 9,999.9  |  +/-XX%<BR>
+
+Account             | Forecast*          | Change
+-------------------------------------------
+Snowflake Usage     | $9,999.9           | +/-XX%
+WAREHOUSE1          | $9,999.9           | +/-XX%
+WAREHOUSE2          | $9,999.9           | +/-XX%
+CLOUD_SERVICES_ONLY | $9,999.9           | +/-XX%
+DATABASE_BYTES(GB)  | 9,999.9            | +/-XX%
 
 
 ## Acceptance Criteria
@@ -53,7 +61,7 @@ SELECT * from METERING_HISTORY_NAME_TREND;
 
 
 
-## AWS Slack External Function Installation Instructions
+## AWS Lambda External Function Installation Instructions
 Steps for creating Snowflake external function using the CloudFormation template:
 
 1. Go to AWS cloudformation and create a stack using this template:
@@ -70,7 +78,7 @@ snowflake-usage-monitor-cf.yaml
 
 USE ROLE ACCOUNTADMIN;
 
-CREATE OR REPLACE API INTEGRATION  usage_monitor_slack_integration
+CREATE OR REPLACE API INTEGRATION  usage_monitor_lambda_integration
     API_PROVIDER = aws_api_gateway
 --    API_PROVIDER = aws_private_api_gateway 
     API_AWS_ROLE_ARN = 'arn:aws:iam::<id>:role/snowflake-usage-monitor-agw-role'
@@ -80,7 +88,7 @@ CREATE OR REPLACE API INTEGRATION  usage_monitor_slack_integration
     ;
 
 -- Update the API Gateway role trust relation with API integration's API_AWS_IAM_USER_ARN and API_AWS_EXTERNAL_ID
-DESCRIBE INTEGRATION usage_monitor_slack_integration;
+DESCRIBE INTEGRATION usage_monitor_lambda_integration;
 ```
 
 4. Update the API Gateway role trust relation with API integration's API_AWS_IAM_USER_ARN and API_AWS_EXTERNAL_ID by following these instructions, [click here](https://docs.snowflake.com/en/sql-reference/external-functions-creating-aws-common-api-integration-proxy-link.html).
@@ -89,9 +97,9 @@ DESCRIBE INTEGRATION usage_monitor_slack_integration;
 5. Create the external function
 ```
 USE DATABASE USAGE_MONITOR;
-CREATE OR REPLACE EXTERNAL FUNCTION usage_monitor_slack(v varchar, l integer, o varchar)
+CREATE OR REPLACE EXTERNAL FUNCTION usage_monitor_lambda(v varchar, l integer, o varchar)
     RETURNS variant
-    api_integration = usage_monitor_slack_integration
+    api_integration = usage_monitor_lambda_integration
     AS '<resource_invocation_url from cloudformation output>';
 ```
 
@@ -100,13 +108,13 @@ CREATE OR REPLACE EXTERNAL FUNCTION usage_monitor_slack(v varchar, l integer, o 
 
 # Run one of these depending on if you want to run on METERING_HISTORY_NAME_TREND or METERING_HISTORY_TREND
 ```
-CREATE OR REPLACE PROCEDURE run_usage_monitor_slack()
+CREATE OR REPLACE PROCEDURE run_usage_monitor_lambda()
 RETURNS INT
 LANGUAGE SQL
 AS $$
 BEGIN
     CALL CALC_METERING_HISTORY_TREND();
-    SELECT usage_monitor_slack(name, forecast, change) 
+    SELECT usage_monitor_lambda(name, forecast, change) 
     FROM metering_history_name_trend
     ORDER BY forecast DESC;
 END;
@@ -114,13 +122,13 @@ $$;
 ```
 or 
 ```
-CREATE OR REPLACE PROCEDURE run_usage_monitor_slack()
+CREATE OR REPLACE PROCEDURE run_usage_monitor_lambda()
 RETURNS INT
 LANGUAGE SQL
 AS $$
 BEGIN
     CALL CALC_METERING_HISTORY_TREND();
-    SELECT usage_monitor_slack(account, forecast, change) 
+    SELECT usage_monitor_lambda(account, forecast, change) 
     FROM metering_history_trend
     ORDER BY forecast DESC;
 END;
@@ -130,9 +138,9 @@ $$;
 7. Schedule usage_monitor to run daily by creating a task
 ```
 CREATE OR REPLACE TASK daily_monitor
-COMMENT = 'Task to run usage monitor slack'
+COMMENT = 'Task to run usage monitor lambda'
 AS
-CALL run_usage_monitor_slack();
+CALL run_usage_monitor_lambda();
 
 ```
 
