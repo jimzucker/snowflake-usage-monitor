@@ -17,6 +17,15 @@ specific language governing permissions and limitations
 under the License.
 */
 
+/*
+    There are 2 select statements that convert USAGE_IN_CREDITS to USAGE_IN_CURRENCY. 
+    They do this by multiplying the USAGE_IN_CREDITS by the COST PER CREDIT. 
+    This COST PER CREDIT depends on the type of account that you have.
+    For a BASIC account, it costs $2 per credit.
+    For an Enterprise Account, it cosst $3.7 per credit.
+    If you have an Enterprise Account, please change the values in function1 and function2 from '2' to '3.7'.
+*/
+
 CREATE DATABASE IF NOT EXISTS USAGE_MONITOR;
 
 USE DATABASE USAGE_MONITOR;
@@ -65,7 +74,7 @@ var who_cares = snowflake.execute( { sqlText:
       `CREATE OR REPLACE TEMPORARY TABLE METERING_HISTORY_TREND(ACCOUNT VARCHAR(25), "MTD" VARCHAR(25), "FORECAST" VARCHAR(25), "PRIOR_MONTH" VARCHAR(25), "CHANGE" VARCHAR(25) );`
        } );
        
-var who_cares = snowflake.execute( { sqlText:
+var function1 = snowflake.execute( { sqlText:
       `INSERT INTO METERING_HISTORY_TREND
        SELECT ACCOUNT, TO_CHAR(SUM(CREDITS_USED)*2,'999,999.00') "MTD", 
                 TO_CHAR(SUM(FORECAST)*2,'999,999.00') "FORECAST", 
@@ -149,7 +158,7 @@ var who_cares = snowflake.execute( { sqlText:
       `CREATE OR REPLACE TEMPORARY TABLE METERING_HISTORY_NAME_TREND(NAME VARCHAR(25), "MTD" VARCHAR(25), "FORECAST" VARCHAR(25), "PRIOR_MONTH" VARCHAR(25), "CHANGE" VARCHAR(25) );`
        } );
 
-var who_cares = snowflake.execute( { sqlText:
+var function2 = snowflake.execute( { sqlText:
       `INSERT INTO metering_history_name_trend
 SELECT 'Snowflake Usage' NAME
 	,To_char(mtd.usage_in_currency, '999,999.00') "MTD"

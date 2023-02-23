@@ -64,7 +64,7 @@ def handler(event, context):
             result.append(f"{database.ljust(account_width)} | {str_forecast} | {change.strip()}")
         
         secret = get_secret(SECRET_MANAGER, REGION)
-        result.append("* Forecast components may be ±15-20%")
+        result.append("* Forecast components may be ±15-25%")
 
         slack_url = json.loads(secret)[SLACK_SECRET_KEY_NAME]
         send_slack_message(slack_url, '\n'.join(result))
