@@ -17,15 +17,6 @@ specific language governing permissions and limitations
 under the License.
 */
 
-/*
-    There are 2 select statements that convert USAGE_IN_CREDITS to USAGE_IN_CURRENCY. 
-    They do this by multiplying the USAGE_IN_CREDITS by the COST PER CREDIT MULTIPLER. 
-    This MULTIPLIER depends on the type of account that you have.
-    For a BASIC account, it costs $2 per credit.
-    For an ENTERPRISE Account, it costs $3.7 per credit.
-    If you have an Enterprise Account, please change the value of "multipler" in the first line of code from 2 to 3.7
-*/
-
 CREATE DATABASE IF NOT EXISTS USAGE_MONITOR;
 
 USE DATABASE USAGE_MONITOR;
@@ -35,7 +26,27 @@ RETURNS VARCHAR
 LANGUAGE javascript
 as
 $$
-var MULTIPLIER = 2;
+/*
+    Checks the Organization Usage chart for Service level. Sets Multipler to the Cost Per Credit value.
+    Hardcoded to $2/credit if the Service_Level is Standard, and $3.7/credit otherwise.
+*/
+var multiplier = 0;
+var result_set1 = snowflake.execute( { sqlText:
+       `SELECT SERVICE_LEVEL 
+        FROM SNOWFLAKE.ORGANIZATION_USAGE.USAGE_IN_CURRENCY_DAILY 
+        ORDER BY USAGE_DATE 
+        DESC LIMIT 1;`
+        } );
+
+if(result_set1.next()){
+    var serviceLevel = result_set1.getColumnValue(1);
+    
+    if (serviceLevel !== 'Standard') {
+        multiplier = 3.7;
+    } else {
+        multiplier= 2;
+    }
+}
 
 var who_cares = snowflake.execute( { sqlText:
         `CREATE OR REPLACE TEMPORARY TABLE METERING_HISTORY_TEMPTB(START_TIME_MONTH int, CREDITS_USED double, FORECAST double );`
@@ -78,10 +89,10 @@ var who_cares = snowflake.execute( { sqlText:
 
 var function1 = snowflake.execute( { sqlText:
       `INSERT INTO METERING_HISTORY_TREND
-       SELECT ACCOUNT, TO_CHAR(SUM(CREDITS_USED) * ` + MULTIPLIER + `,'999,999.00') "MTD", 
-                TO_CHAR(SUM(FORECAST) * ` + MULTIPLIER + `,'999,999.00') "FORECAST", 
-                TO_CHAR(SUM(PRIOR_MONTH) * ` + MULTIPLIER + `,'999,999.00') "PRIOR_MONTH", 
-                TO_CHAR((SUM(FORECAST) * ` + MULTIPLIER + ` - SUM(PRIOR_MONTH) * ` + MULTIPLIER + `)/SUM(PRIOR_MONTH) * ` + MULTIPLIER + ` * 100, '999,999.0"%"') "CHANGE"
+       SELECT ACCOUNT, TO_CHAR(SUM(CREDITS_USED) * ` + multiplier + `,'999,999.00') "MTD", 
+                TO_CHAR(SUM(FORECAST) * ` + multiplier + `,'999,999.00') "FORECAST", 
+                TO_CHAR(SUM(PRIOR_MONTH) * ` + multiplier + `,'999,999.00') "PRIOR_MONTH", 
+                TO_CHAR((SUM(FORECAST) * ` + multiplier + ` - SUM(PRIOR_MONTH) * ` + multiplier + `)/SUM(PRIOR_MONTH) * ` + multiplier + ` * 100, '999,999.0"%"') "CHANGE"
         FROM (
           SELECT CURRENT_ACCOUNT() as ACCOUNT, CREDITS_USED, 0 PRIOR_MONTH, 0 "CHANGE", FORECAST FROM METERING_HISTORY_TEMPTB
           WHERE START_TIME_MONTH = (SELECT MAX(START_TIME_MONTH) FROM METERING_HISTORY_TEMPTB)
@@ -197,10 +208,10 @@ FROM (
 	) mtd
 UNION ALL
 SELECT NAME,
-       To_char(Sum(credits_used)* ` + MULTIPLIER + `, '999,999.00') "MTD",
-       To_char(Sum(forecast)* ` + MULTIPLIER + `, '999,999.00')     "FORECAST",
-       To_char(Sum(prior_month)* ` + MULTIPLIER + `, '999,999.00')  "PRIOR_MONTH",
-       To_char(( Sum(forecast)* ` + MULTIPLIER + ` - Sum(prior_month)* ` + MULTIPLIER + ` ) / Sum(prior_month)* ` + MULTIPLIER + ` * 100,
+       To_char(Sum(credits_used)* ` + multiplier + `, '999,999.00') "MTD",
+       To_char(Sum(forecast)* ` + multiplier + `, '999,999.00')     "FORECAST",
+       To_char(Sum(prior_month)* ` + multiplier + `, '999,999.00')  "PRIOR_MONTH",
+       To_char(( Sum(forecast)* ` + multiplier + ` - Sum(prior_month)* ` + multiplier + ` ) / Sum(prior_month)* ` + multiplier + ` * 100,
        '999,999.0"%"')                             "CHANGE"
 FROM   (SELECT NAME,
                credits_used,
@@ -223,10 +234,10 @@ GROUP  BY 1
 HAVING Sum(prior_month) != 0
 UNION ALL
 SELECT NAME,
-       To_char(Sum(credits_used)* ` + MULTIPLIER + `, '999,999.00') "MTD",
-       To_char(Sum(forecast)* ` + MULTIPLIER + `, '999,999.00')     "FORECAST",
-       To_char(Sum(prior_month)* ` + MULTIPLIER + `, '999,999.00')  "PRIOR_MONTH",
-       To_char(Sum(forecast)* ` + MULTIPLIER + `, '999,999.0"%"')    "CHANGE"
+       To_char(Sum(credits_used)* ` + multiplier + `, '999,999.00') "MTD",
+       To_char(Sum(forecast)* ` + multiplier + `, '999,999.00')     "FORECAST",
+       To_char(Sum(prior_month)* ` + multiplier + `, '999,999.00')  "PRIOR_MONTH",
+       To_char(Sum(forecast)* ` + multiplier + `, '999,999.0"%"')    "CHANGE"
 FROM   (SELECT NAME,
                credits_used,
                0 PRIOR_MONTH,
